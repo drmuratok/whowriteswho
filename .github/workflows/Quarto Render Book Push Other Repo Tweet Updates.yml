@@ -1,0 +1,76 @@
+name: Quarto Render Book Push Other Repo Tweet Updates
+
+on:
+  workflow_dispatch:
+  push:
+
+
+jobs:
+  quarto-render-and-deploy:
+    if: "!contains(github.event.head_commit.message, 'WIP')"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      RENV_PATHS_ROOT: ~/.local/share/renv
+    steps:
+      - uses: actions/checkout@v2
+
+      # - uses: actions/setup-python@v2
+      #
+      # - name: "Install Python deps"
+      #   run: |
+      #     pip install -r requirements.txt
+
+      # - uses: r-lib/actions/setup-r@v1
+      #
+      # - name: "Install curl for Bioconductor"
+      #   run: |
+      #     sudo apt -y install libcurl4-openssl-dev
+
+      - name: "Install R Packages: Cache packages"
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+
+      - name: "Install R Packages: Restore packages"
+        shell: Rscript {0}
+        run: |
+          if (!requireNamespace("quarto", quietly = TRUE)) {install.packages("quarto")}
+          if (!requireNamespace("fs", quietly = TRUE)) {install.packages("fs")}
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+          renv::restore()
+
+      - name: "Install Quarto and render"
+        uses: pommevilla/quarto-render@main
+
+      - name: "Render Book"
+        shell: Rscript {0}
+        run: |
+          quarto::quarto_render(".", as_job = FALSE)
+
+
+      - name: Pushes to whowriteswho.github.io
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: '_book'
+          destination-github-username: 'whowriteswho'
+          destination-repository-name: 'whowriteswho.github.io'
+          user-email: drserdarbalci@gmail.com
+          target-branch: main
+
+
+#       - name: "Tweet"
+#         id: date
+#         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+#       - uses: ethomson/send-tweet-action@v1
+#         with:
+#           status: 'Patoloji atlası güncellendi ${{ steps.date.outputs.date }}. Patoloji notları için: https://www.patolojinotlari.com/ #dijitalpatoloji #WSI #preparat için https://www.patolojiatlasi.com/'
+#           consumer-key: ${{ secrets.API_KEY }}
+#           consumer-secret: ${{ secrets.API_SECRET_KEY }}
+#           access-token: ${{ secrets.ACCESS_TOKEN }}
+#           access-token-secret: ${{ secrets.ACCESS_TOKEN_SECRET }}
