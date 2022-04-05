@@ -1,0 +1,23 @@
+project:
+  type: book
+
+book:
+  title: "deneme"
+  author: "Jane Doe"
+  date: "4/6/2022"
+  chapters:
+    - index.qmd
+    - GIS/GIS.qmd
+    - GIS/Osophagus.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+
+
