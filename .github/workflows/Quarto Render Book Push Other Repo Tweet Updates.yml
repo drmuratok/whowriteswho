@@ -27,29 +27,36 @@ jobs:
       #   run: |
       #     sudo apt -y install libcurl4-openssl-dev
 
-      # - name: "Install R Packages: Cache packages"
-      #   uses: actions/cache@v1
-      #   with:
-      #     path: ${{ env.RENV_PATHS_ROOT }}
-      #     key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-renv-
- 
-      # - name: "Install R Packages: Restore packages"
-      #   shell: Rscript {0}
-      #   run: |
-      #     if (!requireNamespace("quarto", quietly = TRUE)) {install.packages("quarto")}
-      #     if (!requireNamespace("fs", quietly = TRUE)) {install.packages("fs")}
-      #     if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
-      #     renv::restore()
+      - name: "Install R Packages: Cache packages"
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
 
-      # - name: "Install Quarto and render"
-      #   uses: pommevilla/quarto-render@main
+      - name: "Install R Packages: Restore packages"
+        shell: Rscript {0}
+        run: |
+          if (!requireNamespace("quarto", quietly = TRUE)) {install.packages("quarto")}
+          if (!requireNamespace("fs", quietly = TRUE)) {install.packages("fs")}
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+          renv::restore()
 
-      # - name: "Render Book"
-      #   shell: Rscript {0}
-      #   run: |
-      #     quarto::quarto_render(".", as_job = FALSE)
+      - name: "Install Quarto and render"
+        uses: pommevilla/quarto-render@main
+
+      - name: "Render Book"
+        shell: Rscript {0}
+        run: |
+          quarto::quarto_render(".", as_job = FALSE)
+
+
+      - name: "Render Book"
+        shell: Rscript {0}
+        run: |
+          quarto::quarto_render(".", as_job = FALSE)
+          if ( file.exists("./googlefdf78975d31d4cca.html") ) { fs::file_copy( path = "./googlefdf78975d31d4cca.html", new_path = "./_book/googlefdf78975d31d4cca.html", overwrite = TRUE ) }
 
 
       - name: Pushes to whowriteswho.github.io
