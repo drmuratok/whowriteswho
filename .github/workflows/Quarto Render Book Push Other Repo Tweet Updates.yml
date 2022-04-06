@@ -59,7 +59,7 @@ jobs:
         with:
           source-directory: '_book'
           destination-github-username: 'whowriteswho'
-          destination-repository-name: 'deneme'
+          destination-repository-name: 'deneme2'
           user-email: drserdarbalci@gmail.com
           target-branch: main
 
